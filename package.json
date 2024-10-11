@@ -10,8 +10,23 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^4.16.0",
     "@astrojs/check": "^0.9.4",
+    "@astrojs/db": "^0.14.2",
+    "@astrojs/tailwind": "^5.1.2",
+    "@supabase/supabase-js": "^2.45.4",
+    "astro": "^4.16.0",
+    "classname-theme": "^1.1.0",
+    "google-auth-library": "^9.14.2",
+    "jsonwebtoken": "^9.0.2",
+    "tailwindcss": "^3.4.13",
     "typescript": "^5.6.3"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/node": "^22.7.5",
+    "prettier": "^3.3.3",
+    "prettier-plugin-astro": "^0.14.1",
+    "prettier-plugin-css-order": "^2.1.2",
+    "prettier-plugin-tailwindcss": "^0.6.8"
   }
 }
