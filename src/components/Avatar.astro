@@ -1,0 +1,49 @@
+---
+import AvatarButton from './AvatarButton.astro';
+import LoginSvg from './icons/LoginSvg.astro';
+import LogoutSvg from './icons/LogoutSvg.astro';
+
+const loggedCookie = Astro.cookies.get('x-auth');
+---
+
+<div class='relative flex flex-col justify-center'>
+  <div
+    avatar-photo
+    tabindex='0'
+    class='flex size-8 select-none items-center justify-center rounded-full border border-zinc-700 bg-zinc-300 hover:cursor-pointer'
+  >
+    <span class='font-bold text-black'>S</span>
+  </div>
+  <div
+    avatar-options
+    class='absolute right-0 top-full h-0 overflow-hidden rounded-md border border-zinc-500 bg-zinc-900 opacity-0 transition-all duration-200'
+  >
+    <div class='flex flex-col gap-2 p-2'>
+      <span>Hello world</span>
+
+      <AvatarButton
+        href='/api/auth/logout'
+        text='Logout'
+        hidden={!loggedCookie?.value}
+      >
+        <LogoutSvg />
+      </AvatarButton>
+
+      <AvatarButton href='/login' text='Login' hidden={!!loggedCookie?.value}>
+        <LoginSvg />
+      </AvatarButton>
+    </div>
+  </div>
+</div>
+
+<style scoped>
+  div[avatar-options] {
+    interpolate-size: allow-keywords;
+  }
+
+  div[avatar-photo]:focus ~ div[avatar-options],
+  div[avatar-options]:has(a:hover) {
+    opacity: 100;
+    height: auto;
+  }
+</style>

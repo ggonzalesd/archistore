@@ -1,0 +1,21 @@
+---
+import GoogleButton from '@/components/login/GoogleButton.astro';
+import TwitterButton from '@/components/login/TwitterButton.astro';
+import LoginLayout from '@/layouts/LoginLayout.astro';
+---
+
+<LoginLayout title='Login'>
+  <section class='container mx-auto flex h-screen items-center justify-center'>
+    <div class='flex overflow-hidden rounded-md'>
+      <div
+        class='hidden w-64 bg-gradient-to-br from-sky-700 to-sky-900 md:flex'
+      >
+      </div>
+      <div class='flex flex-col items-center gap-2 bg-zinc-800 px-4 py-2'>
+        <span class='text-xl font-bold text-zinc-300'> Create An Account </span>
+
+        <GoogleButton />
+      </div>
+    </div>
+  </section>
+</LoginLayout>

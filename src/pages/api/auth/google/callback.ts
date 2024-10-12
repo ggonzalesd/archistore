@@ -63,7 +63,6 @@ export const GET: APIRoute = async ({ url, redirect, cookies }) => {
   let roles = 0;
 
   if (supaUser.data.length >= 1) {
-    console.log(supaUser.data[0]);
     const { data, error } = supaUserInfoSchema.safeParse(supaUser.data[0]);
     if (error) {
       console.log(error);

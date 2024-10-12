@@ -1,4 +1,6 @@
 ---
+import Header from '@/components/Header.astro';
+
 interface Props {
   title: string;
 }
@@ -16,7 +18,8 @@ const { title } = Astro.props;
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
   </head>
-  <body>
+  <body class="dark bg-zinc-100 text-zinc-900 dark:bg-zinc-900 mt-14 sm:mt-16 dark:text-white">
+    <Header />
     <slot />
   </body>
 </html>
