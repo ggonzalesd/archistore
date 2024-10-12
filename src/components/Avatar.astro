@@ -26,8 +26,12 @@ const user = Astro.locals.user;
     avatar-options
     class='absolute right-0 top-full h-0 overflow-hidden rounded-md border border-zinc-500 bg-zinc-900 opacity-0 transition-all duration-200'
   >
-    <div class='flex flex-col gap-2 p-2'>
-      <span>Hello world</span>
+    <div class='flex flex-col gap-1 p-2'>
+      <AvatarButton
+        href='/profile'
+        text='Profile'
+        hidden={!loggedCookie?.value}
+      />
 
       <AvatarButton
         href='/api/auth/logout'

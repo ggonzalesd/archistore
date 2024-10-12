@@ -25,8 +25,8 @@ export const GET: APIRoute = async ({ url, redirect, cookies }) => {
 
   // Check if the 'code' is valid
   const google = generateGoogleClient();
-  let tokens: Credentials | null = null;
 
+  let tokens: Credentials | null = null;
   try {
     const tokenRes = await google.getToken(code);
     tokens = tokenRes.tokens;
@@ -118,8 +118,10 @@ export const GET: APIRoute = async ({ url, redirect, cookies }) => {
     httpOnly: true,
     maxAge: 60 * 60 * 24 * 30,
     path: '/',
-    sameSite: 'strict',
+    sameSite: 'lax',
   });
 
-  return redirect('/check', 302);
+  const state = url.searchParams.get('state');
+
+  return redirect(state ?? '/', 302);
 };

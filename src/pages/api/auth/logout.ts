@@ -4,7 +4,7 @@ export const GET: APIRoute = ({ cookies, redirect }) => {
   cookies.delete('x-auth', {
     httpOnly: true,
     secure: import.meta.env.PROD,
-    sameSite: 'strict',
+    sameSite: 'lax',
     path: '/',
   });
 

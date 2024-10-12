@@ -5,6 +5,12 @@ interface Props {
   name: string;
 }
 
+const ref = Astro.url.searchParams.get('href');
+const params = new URLSearchParams();
+if (ref) {
+  params.append('state', ref);
+}
+
 const { href, name, class: className } = Astro.props;
 ---
 
@@ -13,7 +19,7 @@ const { href, name, class: className } = Astro.props;
     'inline-flex items-center gap-1 overflow-hidden rounded-md border transition-transform hover:scale-105',
     className,
   ]}
-  href={href}
+  href={href + '?' + params}
 >
   <slot />
   <span class='px-2'>Login with {name}</span>

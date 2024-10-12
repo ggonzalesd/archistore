@@ -1,18 +1,10 @@
-import { generateGoogleClient } from '@/providers/google';
+import { createLoginUrl, generateGoogleClient } from '@/providers/google';
 import type { APIRoute } from 'astro';
 
-export const GET: APIRoute = () => {
+export const GET: APIRoute = (context) => {
   const google = generateGoogleClient();
 
-  const authUrl = google.generateAuthUrl({
-    access_type: 'offline',
-    scope: [
-      'https://www.googleapis.com/auth/userinfo.profile',
-      'https://www.googleapis.com/auth/userinfo.email',
-      'openid',
-    ],
-    prompt: 'consent',
-  });
+  const authUrl = createLoginUrl(google, context.url.searchParams.get('state'));
 
   return new Response(null, {
     status: 302,

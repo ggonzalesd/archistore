@@ -1,7 +1,7 @@
-import { defineMiddleware } from 'astro:middleware';
+import { defineMiddleware, sequence } from 'astro:middleware';
 import { checkJwtToken } from './providers/jwt';
 
-export const onRequest = defineMiddleware((context, next) => {
+const readJwtToken = defineMiddleware((context, next) => {
   const jwt = context.cookies.get('x-auth')?.value;
   if (jwt) {
     const payload = checkJwtToken(jwt);
@@ -16,3 +16,17 @@ export const onRequest = defineMiddleware((context, next) => {
 
   return next();
 });
+
+const validateAccountPayment = defineMiddleware((context, next) => {
+  if (context.url.pathname.startsWith('/api/payment')) {
+    const user = context.locals.user;
+    if (!user || !user.id) {
+      const params = new URLSearchParams();
+      params.append('href', context.url.href);
+      return context.redirect('/login?' + params, 302);
+    }
+  }
+  return next();
+});
+
+export const onRequest = sequence(readJwtToken, validateAccountPayment);
