@@ -61,6 +61,8 @@ export const GET: APIRoute = async ({ url, redirect, cookies }) => {
 
   let sub = null;
   let roles = 0;
+  let name = null;
+  let photo = null;
 
   if (supaUser.data.length >= 1) {
     const { data, error } = supaUserInfoSchema.safeParse(supaUser.data[0]);
@@ -70,6 +72,8 @@ export const GET: APIRoute = async ({ url, redirect, cookies }) => {
     }
     sub = data.id;
     roles = data.roles;
+    name = data.display;
+    photo = data.photo;
   } else {
     try {
       const response = await fetch(
@@ -95,13 +99,15 @@ export const GET: APIRoute = async ({ url, redirect, cookies }) => {
       if (error) throw error;
 
       sub = data[0].id;
+      name = data[0].display;
+      photo = data[0].photo;
     } catch (e) {
       console.log(e);
       return responseError('There is a problem on account creating', 500);
     }
   }
 
-  const jwt = generateJwtToken({ sub, roles });
+  const jwt = generateJwtToken({ sub, roles, name, photo });
 
   if (jwt == null) {
     return responseError('There is a problem with the token', 500);
@@ -115,5 +121,5 @@ export const GET: APIRoute = async ({ url, redirect, cookies }) => {
     sameSite: 'strict',
   });
 
-  return redirect('/', 302);
+  return redirect('/check', 302);
 };

@@ -4,6 +4,8 @@ import LoginSvg from './icons/LoginSvg.astro';
 import LogoutSvg from './icons/LogoutSvg.astro';
 
 const loggedCookie = Astro.cookies.get('x-auth');
+
+const user = Astro.locals.user;
 ---
 
 <div class='relative flex flex-col justify-center'>
@@ -12,7 +14,13 @@ const loggedCookie = Astro.cookies.get('x-auth');
     tabindex='0'
     class='flex size-8 select-none items-center justify-center rounded-full border border-zinc-700 bg-zinc-300 hover:cursor-pointer'
   >
-    <span class='font-bold text-black'>S</span>
+    {
+      user?.photo ? (
+        <img class='size-full rounded-full' src={user?.photo} />
+      ) : (
+        <span class='font-bold text-black'>{(user?.name ?? 'U')[0]}</span>
+      )
+    }
   </div>
   <div
     avatar-options

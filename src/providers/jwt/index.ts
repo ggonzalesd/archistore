@@ -3,6 +3,8 @@ import jwt, { type JwtPayload } from 'jsonwebtoken';
 export const generateJwtToken = (payload: {
   sub: string;
   roles: number;
+  name: string;
+  photo: string;
 }): string | null => {
   if (import.meta.env.SECRET_JWT_AUTH_SECRET === undefined)
     throw new Error('There is no jwt secret');
