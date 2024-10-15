@@ -1,5 +1,6 @@
-import { AppError } from '@/utils/app-error';
 import jwt, { type JwtPayload } from 'jsonwebtoken';
+
+import { AppError } from '@/utils/app-error';
 
 export const generateJwtToken = (payload: {
   sub: string;
@@ -16,13 +17,15 @@ export const generateJwtToken = (payload: {
     });
     return token;
   } catch (e) {
-    throw AppError.serverError('There is a problem with the token');
+    throw AppError.serverError(
+      'providers/jwt: There is a problem with the token',
+    );
   }
 };
 
 export const checkJwtToken = (token: string): JwtPayload | string | null => {
   if (import.meta.env.SECRET_JWT_AUTH_SECRET === undefined)
-    throw new Error('There is no jwt secret');
+    throw AppError.serverError('providers/jwt: There is no Jwt Secret');
   try {
     const decoded = jwt.verify(token, import.meta.env.SECRET_JWT_AUTH_SECRET);
     return decoded;

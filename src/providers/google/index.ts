@@ -1,9 +1,10 @@
-import { AppError } from '@/utils/app-error';
 import {
   LoginTicket,
   OAuth2Client,
   type Credentials,
 } from 'google-auth-library';
+
+import { AppError } from '@/utils/app-error';
 
 export const generateGoogleClient = () =>
   new OAuth2Client({
@@ -14,7 +15,9 @@ export const generateGoogleClient = () =>
 
 export const getFromCode = async (code: string | null) => {
   if (!code) {
-    throw AppError.badRequest('Authorization code not found');
+    throw AppError.badRequest('Authorization code not found').withEncrypted(
+      false,
+    );
   }
 
   // Check if the 'code' is valid
@@ -25,12 +28,16 @@ export const getFromCode = async (code: string | null) => {
     const tokenRes = await google.getToken(code);
     tokens = tokenRes.tokens;
   } catch (e) {
-    throw AppError.unauthorized('Authorization code not allowed!');
+    throw AppError.unauthorized(
+      `Authorization '${code}' code not allowed!`,
+    ).withEncrypted(false);
   }
 
   google.setCredentials(tokens);
   if (tokens.id_token == null || tokens.access_token == null) {
-    throw AppError.unauthorized('Authorization id token missing');
+    throw AppError.unauthorized(
+      'Authorization: id_token and access_token missing',
+    );
   }
 
   // Get Login ticket
@@ -48,7 +55,9 @@ export const getFromCode = async (code: string | null) => {
   const userid = payload?.sub;
 
   if (payload == null || userid == null) {
-    throw AppError.serverError('There is a problem with payload');
+    throw AppError.serverError(
+      'There is a problem with payload: ' + JSON.stringify(payload),
+    );
   }
 
   return payload;

@@ -1,7 +1,22 @@
 ---
+import { supabaseGetProducts } from '@/providers/supabase';
 import Layout from '../layouts/Layout.astro';
+
+// const products = await supabaseGetProducts(0, 10);
 ---
 
 <Layout title='Welcome to Astro.'>
-  <section class='mx-auto w-full max-w-screen-lg'></section>
+  <section class='mx-auto w-full max-w-screen-lg'>
+    {
+      //  products.map((data) => (
+      //    <article>
+      //      <div>{JSON.stringify(data)}</div>
+      //      <h5>{data.title}</h5>
+      //      <p>{data.description}</p>
+      //      <p>{data.price / 100}</p>
+      //      <span>{new Date(data.created_at ?? '').toLocaleString()}</span>
+      //    </article>
+      //  ))
+    }
+  </section>
 </Layout>

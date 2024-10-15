@@ -7,5 +7,10 @@ declare namespace App {
       name?: string;
       photo?: string;
     };
+    error?: {
+      message: string;
+      status: number;
+      encrypted: boolean;
+    };
   }
 }

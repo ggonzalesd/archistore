@@ -4,22 +4,12 @@ import { getFromCode } from '@/providers/google';
 import { generateJwtToken } from '@/providers/jwt';
 import { supabaseCreateUser, supabaseGetUser } from '@/providers/supabase';
 
-import { AppError } from '@/utils/app-error';
+import { responseError } from '@/utils/app-error';
 
-const responseError = (message: string, status: number) =>
-  new Response(
-    JSON.stringify({
-      error: message,
-    }),
-    {
-      status,
-    },
-  );
-
-export const GET: APIRoute = async ({ url, redirect, cookies }) => {
+export const GET: APIRoute = async (context) => {
   // Verific if where is a param 'code'
-  const state = url.searchParams.get('state');
-  const code = url.searchParams.get('code');
+  const state = context.url.searchParams.get('state');
+  const code = context.url.searchParams.get('code');
 
   try {
     const payload = await getFromCode(code);
@@ -44,7 +34,7 @@ export const GET: APIRoute = async ({ url, redirect, cookies }) => {
     };
     const jwt = generateJwtToken(payloadJwt);
 
-    cookies.set('x-auth', jwt, {
+    context.cookies.set('x-auth', jwt, {
       secure: import.meta.env.PROD,
       httpOnly: true,
       maxAge: 60 * 60 * 24 * 30,
@@ -52,14 +42,8 @@ export const GET: APIRoute = async ({ url, redirect, cookies }) => {
       sameSite: 'lax',
     });
 
-    return redirect(state ?? '/', 302);
+    return context.redirect(state ?? '/', 302);
   } catch (e) {
-    if (e instanceof AppError) {
-      return responseError(e.message, e.status);
-    }
-    if (e instanceof Error) {
-      return responseError(e.message, 500);
-    }
-    return responseError('Something Went Wrong', 500);
+    return responseError(e, context.rewrite, context.locals);
   }
 };

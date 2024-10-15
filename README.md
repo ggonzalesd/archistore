@@ -1,54 +1,52 @@
-# Astro Starter Kit: Basics
+# Archistore
 
-```sh
-npm create astro@latest -- --template basics
+Archistore is a digital asset store currently under development, offering items like 3D models, with plans to expand to more digital assets in the future. The project is built using Astro, integrating Google authentication, Supabase for database management, JWT for token handling, and Tailwind CSS for styling. Future plans include adding payment methods like PayPal and Mercado Pago.
+
+## Key Features
+
+- **Framework:** Built with Astro for a fast and modular site structure.
+- **Authentication:** Google authentication implemented.
+- **Database:** Supabase is used for managing the database with support for SQL.
+- **Token Management:** JWT (JSON Web Token) is used for secure user sessions and token handling.
+- **Styling:** Tailwind CSS is utilized for a responsive and modern design.
+- **Payment Integration:** Plans to add PayPal and Mercado Pago as payment gateways for easy transactions.
+
+## Getting Started
+
+To get started with Archistore, follow these steps:
+
+1. **Clone the repository:**
+
+```bash
+git clone https://github.com/your-username/archistore.git
+cd archistore
 ```
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/astro/tree/latest/examples/basics)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/astro/tree/latest/examples/basics)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/withastro/astro?devcontainer_path=.devcontainer/basics/devcontainer.json)
+2. **Install dependencies:**
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
-
-![just-the-basics](https://github.com/withastro/astro/assets/2244813/a0a5533c-a856-4198-8470-2d67b1d7c554)
-
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src/
-│   ├── components/
-│   │   └── Card.astro
-│   ├── layouts/
-│   │   └── Layout.astro
-│   └── pages/
-│       └── index.astro
-└── package.json
+```bash
+npm install
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+3. **Start the development server:**
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+```bash
+npm run dev
+```
 
-Any static assets, like images, can be placed in the `public/` directory.
+## Future Enhancements
 
-## 🧞 Commands
+- Additional Assets: Expand the catalog to include more types of digital assets.
+- Payment Methods: Complete the integration of PayPal and Mercado Pago.
 
-All commands are run from the root of the project, from a terminal:
+## Contributing
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+Contributions are NOT being accepted.
 
-## 👀 Want to learn more?
+## License
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+This project is licensed under the MIT License.
+
+```sql
+Feel free to modify the details or add more specific instructions based on your project's needs!
+```
