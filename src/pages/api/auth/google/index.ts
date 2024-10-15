@@ -1,10 +1,13 @@
-import { createLoginUrl, generateGoogleClient } from '@/providers/google';
 import type { APIRoute } from 'astro';
 
-export const GET: APIRoute = (context) => {
+import { createLoginUrl, generateGoogleClient } from '@/providers/google';
+
+export const GET: APIRoute = ({ url }) => {
+  const state = url.searchParams.get('state');
+
   const google = generateGoogleClient();
 
-  const authUrl = createLoginUrl(google, context.url.searchParams.get('state'));
+  const authUrl = createLoginUrl(google, state);
 
   return new Response(null, {
     status: 302,

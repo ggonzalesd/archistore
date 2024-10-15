@@ -1,10 +1,10 @@
-import { generateGoogleClient } from '@/providers/google';
-import { generateJwtToken } from '@/providers/jwt';
-import { supabase } from '@/providers/supabase';
-import { googleUserInfoSchema } from '@/schema/google.schema';
-import { supaUserInfoSchema } from '@/schema/supabase.schema';
 import type { APIRoute } from 'astro';
-import type { Credentials } from 'google-auth-library';
+
+import { getFromCode } from '@/providers/google';
+import { generateJwtToken } from '@/providers/jwt';
+import { supabaseCreateUser, supabaseGetUser } from '@/providers/supabase';
+
+import { AppError } from '@/utils/app-error';
 
 const responseError = (message: string, status: number) =>
   new Response(
@@ -18,110 +18,48 @@ const responseError = (message: string, status: number) =>
 
 export const GET: APIRoute = async ({ url, redirect, cookies }) => {
   // Verific if where is a param 'code'
-  const code = url.searchParams.get('code');
-  if (!code) {
-    return responseError('Authorization code not found!', 400);
-  }
-
-  // Check if the 'code' is valid
-  const google = generateGoogleClient();
-
-  let tokens: Credentials | null = null;
-  try {
-    const tokenRes = await google.getToken(code);
-    tokens = tokenRes.tokens;
-  } catch (e) {
-    return responseError('Authorization code not allowed!', 400);
-  }
-
-  google.setCredentials(tokens);
-  if (tokens.id_token == null) {
-    return responseError('Authorization id token missing', 400);
-  }
-
-  // Get Login ticket
-  const ticket = await google.verifyIdToken({
-    idToken: tokens.id_token,
-    audience: import.meta.env.SECRET_GOOGLE_CLIENT_ID,
-  });
-
-  const payload = ticket.getPayload();
-  const userid = payload?.sub;
-
-  // Check if there is an user in our database
-  const supaUser = await supabase
-    .from('clients')
-    .select('*')
-    .eq('user_code', 'google/' + userid)
-    .limit(1);
-
-  if (supaUser.error) {
-    return responseError('There is a problem with our services', 500);
-  }
-
-  let sub = null;
-  let roles = 0;
-  let name = null;
-  let photo = null;
-
-  if (supaUser.data.length >= 1) {
-    const { data, error } = supaUserInfoSchema.safeParse(supaUser.data[0]);
-    if (error) {
-      console.log(error);
-      return responseError('Database is having problems', 500);
-    }
-    sub = data.id;
-    roles = data.roles;
-    name = data.display;
-    photo = data.photo;
-  } else {
-    try {
-      const response = await fetch(
-        'https://www.googleapis.com/oauth2/v3/userinfo?access_token=' +
-          google.credentials.access_token,
-      );
-      const userInfo = googleUserInfoSchema.parse(await response.json());
-
-      const newUser = {
-        user_code: 'google/' + userInfo.sub,
-        display: userInfo.name,
-        photo: userInfo.picture,
-        email: userInfo.email,
-        active: true,
-        roles: 0,
-      };
-
-      const { error, data } = await supabase
-        .from('clients')
-        .insert([newUser])
-        .select();
-
-      if (error) throw error;
-
-      sub = data[0].id;
-      name = data[0].display;
-      photo = data[0].photo;
-    } catch (e) {
-      console.log(e);
-      return responseError('There is a problem on account creating', 500);
-    }
-  }
-
-  const jwt = generateJwtToken({ sub, roles, name, photo });
-
-  if (jwt == null) {
-    return responseError('There is a problem with the token', 500);
-  }
-
-  cookies.set('x-auth', jwt, {
-    secure: import.meta.env.PROD,
-    httpOnly: true,
-    maxAge: 60 * 60 * 24 * 30,
-    path: '/',
-    sameSite: 'lax',
-  });
-
   const state = url.searchParams.get('state');
+  const code = url.searchParams.get('code');
 
-  return redirect(state ?? '/', 302);
+  try {
+    const payload = await getFromCode(code);
+
+    // Check if there is an user in our database
+    let supaUser = await supabaseGetUser('google/' + payload.sub);
+
+    if (!supaUser) {
+      supaUser = await supabaseCreateUser(
+        'google/' + payload.sub,
+        payload.name,
+        payload.picture,
+        payload.email,
+      );
+    }
+
+    const payloadJwt = {
+      sub: supaUser.id,
+      roles: supaUser.roles,
+      name: supaUser.display,
+      photo: supaUser.photo,
+    };
+    const jwt = generateJwtToken(payloadJwt);
+
+    cookies.set('x-auth', jwt, {
+      secure: import.meta.env.PROD,
+      httpOnly: true,
+      maxAge: 60 * 60 * 24 * 30,
+      path: '/',
+      sameSite: 'lax',
+    });
+
+    return redirect(state ?? '/', 302);
+  } catch (e) {
+    if (e instanceof AppError) {
+      return responseError(e.message, e.status);
+    }
+    if (e instanceof Error) {
+      return responseError(e.message, 500);
+    }
+    return responseError('Something Went Wrong', 500);
+  }
 };

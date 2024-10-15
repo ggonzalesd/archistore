@@ -1,13 +1,14 @@
+import { AppError } from '@/utils/app-error';
 import jwt, { type JwtPayload } from 'jsonwebtoken';
 
 export const generateJwtToken = (payload: {
   sub: string;
   roles: number;
-  name: string;
-  photo: string;
-}): string | null => {
+  name?: string | null;
+  photo?: string | null;
+}): string => {
   if (import.meta.env.SECRET_JWT_AUTH_SECRET === undefined)
-    throw new Error('There is no jwt secret');
+    throw AppError.serverError('There is no jwt secret');
 
   try {
     const token = jwt.sign(payload, import.meta.env.SECRET_JWT_AUTH_SECRET, {
@@ -15,7 +16,7 @@ export const generateJwtToken = (payload: {
     });
     return token;
   } catch (e) {
-    return null;
+    throw AppError.serverError('There is a problem with the token');
   }
 };
 

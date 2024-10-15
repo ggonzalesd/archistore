@@ -8,5 +8,5 @@ export const GET: APIRoute = ({ cookies, redirect }) => {
     path: '/',
   });
 
-  return redirect('/', 302);
+  return redirect('/', 308);
 };
