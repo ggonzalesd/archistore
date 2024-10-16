@@ -34,39 +34,38 @@ export class AppError extends Error {
 
 export const responseError = (
   e: unknown,
-  rewrite: Parameters<APIRoute>[0]['rewrite'],
-  locals: Parameters<APIRoute>[0]['locals'],
+  astro: Pick<Parameters<APIRoute>[0], 'rewrite' | 'locals'>,
 ) => {
-  locals.error = {
+  astro.locals.error = {
     message: 'Something When wrong',
     status: 500,
     encrypted: true,
   };
 
   if (e instanceof AppError) {
-    locals.error.status = e.status;
-    locals.error.encrypted = e.encrypted;
+    astro.locals.error.status = e.status;
+    astro.locals.error.encrypted = e.encrypted;
   }
 
   if (e instanceof Error) {
-    locals.error.message = e.message;
+    astro.locals.error.message = e.message;
   }
 
   if (typeof e === 'string') {
-    locals.error.message = e;
+    astro.locals.error.message = e;
   }
 
-  if (locals.error.encrypted) {
+  if (astro.locals.error.encrypted) {
     const iv = crypto.randomBytes(16);
     const cipher = crypto.createCipheriv(
       'aes-256-cbc',
       import.meta.env.SECRET_APP_ERROR_SECRET,
       iv,
     );
-    let encrypted = cipher.update(locals.error.message, 'utf8', 'hex');
+    let encrypted = cipher.update(astro.locals.error.message, 'utf8', 'hex');
     encrypted += cipher.final('hex');
-    locals.error.message = iv.toString('hex') + '/' + encrypted;
+    astro.locals.error.message = iv.toString('hex') + '/' + encrypted;
   }
 
-  return rewrite('/error');
+  return astro.rewrite('/error');
 };

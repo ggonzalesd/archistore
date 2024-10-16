@@ -2,6 +2,42 @@ import jwt, { type JwtPayload } from 'jsonwebtoken';
 
 import { AppError } from '@/utils/app-error';
 
+export const generateFreeJwtToken = () => {
+  if (import.meta.env.SECRET_JWT_FREE_SECRET === undefined)
+    throw AppError.serverError('There is no free jwt secret');
+
+  try {
+    const token = jwt.sign(
+      {
+        validate: new Date().getTime() + 1000 * 20,
+      },
+      import.meta.env.SECRET_JWT_FREE_SECRET,
+      {
+        expiresIn: '5m',
+      },
+    );
+
+    return token;
+  } catch (e) {
+    throw AppError.serverError(
+      'providers/jwt: There is a problem with the free token',
+    );
+  }
+};
+
+export const checkFreeJwtToken = (
+  token: string,
+): JwtPayload | string | null => {
+  if (import.meta.env.SECRET_JWT_FREE_SECRET === undefined)
+    throw AppError.serverError('providers/jwt: There is no FREE Jwt Secret');
+  try {
+    const decoded = jwt.verify(token, import.meta.env.SECRET_JWT_AUTH_SECRET);
+    return decoded;
+  } catch (e) {
+    return null;
+  }
+};
+
 export const generateJwtToken = (payload: {
   sub: string;
   roles: number;

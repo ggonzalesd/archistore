@@ -1,8 +1,33 @@
 import type { APIRoute } from 'astro';
 
 import { supabase } from '@/providers/supabase';
+import { checkFreeJwtToken } from '@/providers/jwt';
+import { AppError, responseError } from '@/utils/app-error';
 
-export const GET: APIRoute = async ({ redirect }) => {
+export const GET: APIRoute = async ({ params, url, rewrite, locals }) => {
+  let isOk = false;
+
+  const freeQuery = url.searchParams.get('free');
+  if (typeof freeQuery === 'string') {
+    const free = checkFreeJwtToken(freeQuery);
+    if (free && typeof free !== 'string' && typeof free.validate === 'number') {
+      if (new Date().getTime() >= free.validate) {
+        isOk = true;
+      }
+    }
+    if (!isOk) {
+      return responseError(
+        AppError.unauthorized('Token no valido').withEncrypted(false),
+        {
+          rewrite,
+          locals,
+        },
+      );
+    }
+  }
+
+  console.log(params.slug);
+
   const result = await supabase.storage
     .from('app')
     .createSignedUrl('download/profile.jpg', 60);

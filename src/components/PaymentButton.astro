@@ -1,0 +1,24 @@
+---
+interface Props {
+  href?: string;
+  variant: 'free' | 'paypal' | 'mercadopago';
+}
+
+const { href, variant } = Astro.props;
+---
+
+<a
+  href={href}
+  class:list={[
+    'inline-flex items-center gap-2 rounded-sm px-2 py-1 font-bold outline-2 outline-offset-4 transition-all hover:scale-105 hover:shadow-md focus:outline',
+    {
+      free: 'bg-green-600 outline-green-600 hover:bg-green-500 hover:shadow-green-500/20',
+      paypal:
+        'bg-sky-800 outline-sky-600 hover:bg-sky-700 hover:shadow-sky-500/20',
+      mercadopago:
+        'bg-cyan-600 outline-cyan-600 hover:bg-cyan-500 hover:shadow-cyan-500/20',
+    }[variant],
+  ]}
+>
+  <slot />
+</a>

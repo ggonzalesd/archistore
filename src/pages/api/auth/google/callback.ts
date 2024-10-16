@@ -44,6 +44,6 @@ export const GET: APIRoute = async (context) => {
 
     return context.redirect(state ?? '/', 302);
   } catch (e) {
-    return responseError(e, context.rewrite, context.locals);
+    return responseError(e, context);
   }
 };
