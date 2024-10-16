@@ -12,13 +12,13 @@ const user = Astro.locals.user;
   <div
     avatar-photo
     tabindex='0'
-    class='flex size-8 select-none items-center justify-center rounded-full border border-zinc-700 bg-zinc-300 hover:cursor-pointer'
+    class='flex size-8 select-none items-center justify-center rounded-full border border-rose-700 bg-rose-300 hover:cursor-pointer'
   >
     {
       user?.photo ? (
         <img class='size-full rounded-full' src={user?.photo} />
       ) : (
-        <span class='font-bold text-black'>{(user?.name ?? 'U')[0]}</span>
+        <span class='font-bold text-rose-950'>{(user?.name ?? 'U')[0]}</span>
       )
     }
   </div>

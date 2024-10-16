@@ -1,0 +1,19 @@
+---
+interface Props {
+  disabled?: boolean;
+  href?: string;
+}
+
+const { href, disabled } = Astro.props;
+---
+
+<a
+  aria-disabled={disabled && 'true'}
+  class:list={[
+    'rounded-md px-2 py-1 font-bold transition-all hover:scale-105 hover:shadow-md hover:brightness-105 aria-disabled:pointer-events-none aria-disabled:opacity-50 aria-disabled:saturate-0',
+    'bg-gradient-to-tr from-yellow-400 to-yellow-600 text-yellow-950 hover:shadow-yellow-600/50',
+  ]}
+  href={href}
+>
+  <slot />
+</a>

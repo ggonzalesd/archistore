@@ -1,0 +1,40 @@
+---
+interface Props {
+  text?: string;
+}
+
+const { text } = Astro.props;
+---
+
+<section class='acordion group'>
+  <label
+    tabindex='0'
+    class='flex items-center gap-4 rounded-md px-2 py-1 hover:cursor-pointer hover:bg-rose-700/20'
+  >
+    <input type='checkbox' class='acordion-checkbox peer hidden' />
+    <svg
+      class='inline size-4 peer-[.acordion-checkbox:checked]:hidden'
+      xmlns='http://www.w3.org/2000/svg'
+      width='1em'
+      height='1em'
+      viewBox='0 0 15 15'
+    >
+      <path fill='currentColor' d='M7.5 12L0 4h15z'></path>
+    </svg>
+    <svg
+      class='hidden size-4 peer-[.acordion-checkbox:checked]:inline'
+      xmlns='http://www.w3.org/2000/svg'
+      width='1em'
+      height='1em'
+      viewBox='0 0 15 15'
+    >
+      <path fill='currentColor' d='m7.5 3l7.5 8H0z'></path>
+    </svg>
+    <span class='select-none'>{text}</span>
+  </label>
+  <div
+    class='flex h-0 flex-col gap-1 overflow-hidden transition-[height] [interpolate-size:allow-keywords] group-has-[.acordion-checkbox:checked]:h-auto'
+  >
+    <slot />
+  </div>
+</section>

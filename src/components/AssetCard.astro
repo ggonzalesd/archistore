@@ -1,0 +1,68 @@
+---
+interface Props {
+  price?: number;
+}
+
+const { price } = Astro.props;
+
+const formatPrice =
+  price == null || price <= 0 ? 'FREE' : parseFloat(`${price}`).toFixed(2);
+---
+
+<article
+  class='flex flex-col items-stretch gap-1 rounded-md bg-gradient-to-b from-sky-800/20 to-rose-600/20 transition-transform has-[.absolute:hover]:scale-[1.02]'
+>
+  <picture class='flex w-full justify-center overflow-hidden'>
+    <img
+      src='/favicon.svg'
+      width='32'
+      class='h-32 w-full object-cover object-center transition-transform hover:scale-105 hover:cursor-pointer'
+    />
+  </picture>
+  <span class='px-2 text-sm'>Super Asset</span>
+  <div class='px-2'>
+    <span class='rounded-full bg-red-600/20 px-2 text-xs text-red-400'>
+      Tag
+    </span>
+  </div>
+  <div class='flex items-center justify-between px-2 pb-2'>
+    {
+      formatPrice === 'FREE' ? (
+        <span class='rounded bg-green-400/20 px-2 font-bold text-green-400'>
+          FREE
+        </span>
+      ) : (
+        <span class='font-bold text-yellow-400'>$ {formatPrice}</span>
+      )
+    }
+    <div class='flex gap-1'>
+      <button
+        class='inline-flex items-center justify-center rounded-md border border-emerald-700 bg-gradient-to-br from-emerald-400 to-emerald-600 p-2 outline-4 outline-offset-4 outline-emerald-500 transition-all hover:shadow hover:shadow-emerald-600 hover:brightness-105 focus:outline active:scale-110 active:brightness-125 disabled:pointer-events-none disabled:saturate-0'
+      >
+        <span class='sr-only'>Buy Super Asset</span>
+        <svg
+          xmlns='http://www.w3.org/2000/svg'
+          width='1em'
+          height='1em'
+          viewBox='0 0 24 24'
+        >
+          <path
+            fill='currentColor'
+            d='M17 18c-1.11 0-2 .89-2 2a2 2 0 0 0 2 2a2 2 0 0 0 2-2a2 2 0 0 0-2-2M1 2v2h2l3.6 7.59l-1.36 2.45c-.15.28-.24.61-.24.96a2 2 0 0 0 2 2h12v-2H7.42a.25.25 0 0 1-.25-.25q0-.075.03-.12L8.1 13h7.45c.75 0 1.41-.42 1.75-1.03l3.58-6.47c.07-.16.12-.33.12-.5a1 1 0 0 0-1-1H5.21l-.94-2M7 18c-1.11 0-2 .89-2 2a2 2 0 0 0 2 2a2 2 0 0 0 2-2a2 2 0 0 0-2-2'
+          ></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+</article>
+
+<style scoped>
+  img {
+    --base-transparent: transparent;
+    mask-image: linear-gradient(to top, var(--base-transparent) 0%, white 50%);
+    transition: var(--base-transparent) 399ms ease;
+  }
+  img:hover {
+    --base-transparent: white;
+  }
+</style>
