@@ -1,9 +1,11 @@
 ---
 interface Props {
+  title: string;
+  slug: string;
   price?: number;
 }
 
-const { price } = Astro.props;
+const { price, slug, title } = Astro.props;
 
 const formatPrice =
   price == null || price <= 0 ? 'FREE' : parseFloat(`${price}`).toFixed(2);
@@ -20,18 +22,16 @@ const formatPrice =
     ][Math.floor(Math.random() * 4)],
   ]}
 >
-  <a href='/p/super-asset'>
+  <a href={`/p/${slug}`}>
     <picture class='flex w-full justify-center overflow-hidden rounded-t-md'>
-      <!-- src={`https://picsum.photos/id/${Math.round(Math.random() * 100 + 100)}/200/200`} -->
-      <!-- src='https://lh3.googleusercontent.com/a/ACg8ocLdmjEjSIGR9XOBB_NNdAX5N4cHb50tuQMNoloudHzavwFDHvRj=s96-c' -->
       <img
-        src='/favicon.svg'
+        src={`https://res.cloudinary.com/dtk4jojr5/image/upload/v1729202479/store/${slug}_0.webp`}
         width='32'
-        class='h-32 w-full object-cover object-center transition-transform hover:scale-105 hover:cursor-pointer'
+        class='h-32 w-full object-contain object-center transition-transform hover:scale-105 hover:cursor-pointer'
       />
     </picture>
   </a>
-  <span class='px-2 text-sm'>Super Asset</span>
+  <span class='px-2 text-sm'>{title}</span>
   <div class='px-2'>
     <span class='rounded-full bg-red-600/20 px-2 text-xs text-red-400'>
       Tag
@@ -51,7 +51,7 @@ const formatPrice =
       <button
         class='inline-flex items-center justify-center rounded-md border border-emerald-700 bg-gradient-to-br from-emerald-400 to-emerald-600 p-2 outline-4 outline-offset-4 outline-emerald-500 transition-all hover:shadow hover:shadow-emerald-600 hover:brightness-105 focus:outline active:scale-110 active:brightness-125 disabled:pointer-events-none disabled:saturate-0'
       >
-        <span class='sr-only'>Buy Super Asset</span>
+        <span class='sr-only'>Buy {slug}</span>
         <svg
           xmlns='http://www.w3.org/2000/svg'
           width='1em'

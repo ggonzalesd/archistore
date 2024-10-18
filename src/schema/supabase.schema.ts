@@ -11,11 +11,13 @@ export const supaUserInfoSchema = z.object({
   id: z.string(),
   created_at: dateSchema,
   user_code: z.string(),
-  display: z.string().optional(),
+  display: z.string().optional().nullable(),
   photo: z.string().optional().nullable(),
   email: z.string().optional(),
   active: z.boolean(),
   roles: z.number(),
+  key: z.string().optional().nullable(),
+  verified: z.boolean(),
 });
 
 export const supaProductsInfoSchema = z.object({
@@ -24,8 +26,9 @@ export const supaProductsInfoSchema = z.object({
   currency: z.enum(['PEN']),
   description: z.string(),
   price: z.number().int().nonnegative(),
-  photo: z.string().optional().nullable(),
+  photos: z.number(),
   discount: z.number().int().min(0).max(100),
   status: z.number().int().min(0),
   created_at: dateSchema,
+  discount_end: dateSchema.optional().nullable(),
 });

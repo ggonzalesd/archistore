@@ -11,9 +11,8 @@ export const GET: APIRoute = async ({ params, url, rewrite, locals }) => {
   if (typeof freeQuery === 'string') {
     const free = checkFreeJwtToken(freeQuery);
     if (free && typeof free !== 'string' && typeof free.validate === 'number') {
-      if (new Date().getTime() >= free.validate) {
+      if (new Date().getTime() >= free.validate && free.slug === params.slug)
         isOk = true;
-      }
     }
     if (!isOk) {
       return responseError(

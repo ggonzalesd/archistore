@@ -16,6 +16,33 @@ const formatError = (e: PostgrestError) => {
   return `Supabase Error\nCode: ${e.code}\nMessage: ${e.message}\nHint: ${e.hint}\nDetails: ${e.details}`;
 };
 
+export const supabaseGetProduct = async (slug: string) => {
+  const products = await supabase
+    .from('products')
+    .select('*')
+    .eq('id', slug)
+    .limit(1);
+
+  if (products.error || !products.data) {
+    throw AppError.serverError(formatError(products.error));
+  }
+
+  if (products.data.length < 1) {
+    throw AppError.notFound(`Product ${slug} not found!`).withEncrypted(false);
+  }
+
+  const parsed = z.array(supaProductsInfoSchema).safeParse(products.data);
+
+  if (!parsed.success) {
+    const errorMessages = parsed.error.issues
+      .map((issue) => issue.message)
+      .join(', ');
+    throw AppError.serverError('Parse error: ' + errorMessages);
+  }
+
+  return parsed.data[0];
+};
+
 export const supabaseGetProducts = async (start: number, end: number) => {
   const products = await supabase
     .from('products')

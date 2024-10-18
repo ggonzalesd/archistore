@@ -4,55 +4,75 @@ import PaypalSvg from '@/components/logos/PaypalSvg.astro';
 import MercadoPagoSvg from '@/components/logos/MercadoPagoSvg.astro';
 import WaitingButton from '@/components/WaitingButton';
 import PaymentButton from '@/components/PaymentButton.astro';
+import PhotoView from '@/components/PhotoView'
 
 import { generateFreeJwtToken } from '@/providers/jwt';
+import { supabaseGetProduct } from '@/providers/supabase';
+import { AppError, responseError } from '@/utils/app-error';
 
 const { slug } = Astro.params;
 
-const product = {
-  id: 'test',
-  title: 'Test Asset',
-  currency: 'PEN',
-  description: 'This is a simple Asset',
-  price: 510,
-  photo: null,
-  discount: 0,
-  status: 0,
-  created_at: new Date('2024-10-15T03:38:14.318Z'),
-};
+let price: string = 'FREE';
+let product: Awaited<ReturnType<typeof supabaseGetProduct>> | null = null;
+const tokenFree = generateFreeJwtToken(slug ?? '');
 
-product.price /= 100;
+try {
+  if(!slug)
+    throw AppError.notFound('Product not found').withEncrypted(false);
 
-const price =
-  product.price == null || product.price <= 0
-    ? 'FREE'
-    : parseFloat(`${product.price}`).toFixed(2);
+  product = await supabaseGetProduct(slug);
 
-const tokenFree = generateFreeJwtToken();
+  product.price /= 100;
+  if(product.price > 0) price = '$ ' + parseFloat(`${product.price}`).toFixed(2)
+
+} catch(e) {
+  return responseError(e, Astro);
+}
 ---
 
 <Layout title='Product'>
-  <section class='container mx-auto pt-14'>
-    <div></div>
-    <div>
-      <h1>{product.title}</h1>
-      <p>{product.description}</p>
-      <span>{price}</span>
-      <div class='flex gap-4'>
-        <WaitingButton
-          href={`/api/storage/${slug}/?free=${tokenFree}`}
-          time={20}
-          client:visible
-        />
+  <section class='container mx-auto grid grid-cols-1 md:grid-cols-2 pt-20 px-2'>
+    <div class='flex items-center flex-col justify-center gap-3'>
+      <PhotoView slug={product.id} photos={Math.max(product.photos, 1)} client:visible />
+    </div>
+    <div class='flex h-full flex-col gap-2'>
+      <h1 class='text-4xl text-rose-300'>{product.title}</h1>
+      <p class="leading-7 max-w-[50ch]">{product.description}</p>
+      <div class="my-4">
+        <span class:list={[
+          "py-1 px-2 rounded-md text-2xl font-bold ",
+          price ==='FREE' ? 'text-green-950 bg-green-400' :'text-yellow-500']}
+        >
+          {price}
+        </span>
+      </div>
 
-        <PaymentButton href='/api/payment/paypal' variant='paypal'>
-          <PaypalSvg class='size-4' />
-          <span>Buy with Paypal</span>
-        </PaymentButton>
-        <PaymentButton href='/api/payment/mercadopago' variant='mercadopago'>
-          <MercadoPagoSvg class='size-4' />
-          <span>Buy with Mercado Pago</span>
-        </PaymentButton>
+      <div class='flex gap-4 my-4'>
+        {
+          !(product.price > 0) && (
+            <WaitingButton
+              href={`/api/storage/${slug}/?free=${tokenFree}`}
+              reload={'/p/' + slug}
+              time={15}
+              maxtime={60 * 5}
+              client:visible
+            />
+          )
+        }
+
+        {
+          (product.price > 0) && (
+          <PaymentButton href='/api/payment/paypal' variant='paypal'>
+            <PaypalSvg class='size-4' />
+            <span>Paypal</span>
+          </PaymentButton>
+          <PaymentButton href='/api/payment/mercadopago' variant='mercadopago'>
+            <MercadoPagoSvg class='size-4' />
+            <span>Mercado Pago</span>
+          </PaymentButton>
+          )
+        }
+
       </div>
     </div>
   </section>

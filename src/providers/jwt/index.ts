@@ -2,14 +2,15 @@ import jwt, { type JwtPayload } from 'jsonwebtoken';
 
 import { AppError } from '@/utils/app-error';
 
-export const generateFreeJwtToken = () => {
+export const generateFreeJwtToken = (slug: string) => {
   if (import.meta.env.SECRET_JWT_FREE_SECRET === undefined)
     throw AppError.serverError('There is no free jwt secret');
 
   try {
     const token = jwt.sign(
       {
-        validate: new Date().getTime() + 1000 * 20,
+        validate: new Date().getTime() + 1000 * 15,
+        slug,
       },
       import.meta.env.SECRET_JWT_FREE_SECRET,
       {

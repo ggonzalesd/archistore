@@ -3,8 +3,6 @@ import type { APIRoute } from 'astro';
 export const GET: APIRoute = async (context) => {
   const token = context.url.searchParams.get('token');
 
-  console.log('CAPTURED');
-
   const response = await fetch(
     import.meta.env.SECRET_PAYPAL_API +
       '/v2/checkout/orders/' +

@@ -1,8 +1,9 @@
 ---
 import Layout from '@/layouts/Layout.astro';
-import Checkbox from '@/components/Checkbox.astro';
-import Accordion from '@/components/Accordion.astro';
 import AssetCard from '@/components/AssetCard.astro';
+import { supabaseGetProducts } from '@/providers/supabase';
+
+const products = await supabaseGetProducts(0, 10);
 ---
 
 <Layout title='Components'>
@@ -11,8 +12,8 @@ import AssetCard from '@/components/AssetCard.astro';
       class='grid grid-cols-2 gap-2 px-2 py-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-10'
     >
       {
-        [...new Uint8Array(10)].map(() => (
-          <AssetCard price={Math.random() * (10 + 5) - 5} />
+        products.map(({ price, title, id }) => (
+          <AssetCard slug={id} title={title} price={price / 100} />
         ))
       }
     </div>
