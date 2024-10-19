@@ -2,11 +2,13 @@ import { createClient, type PostgrestError } from '@supabase/supabase-js';
 import { z } from 'astro:schema';
 
 import {
+  supaOrderSchema,
   supaProductsInfoSchema,
   supaUserInfoSchema,
 } from '@/schema/supabase.schema';
 
 import { AppError } from '@/utils/app-error';
+import { zodParseResolve } from '@/utils/zod-parse-resolver';
 
 const supabaseUrl = import.meta.env.SECRET_SUPABASE_URL;
 const supabaseKey = import.meta.env.SECRET_SUPABASE_SECRET;
@@ -16,31 +18,87 @@ const formatError = (e: PostgrestError) => {
   return `Supabase Error\nCode: ${e.code}\nMessage: ${e.message}\nHint: ${e.hint}\nDetails: ${e.details}`;
 };
 
+const supabaseGetOne = async (
+  table: string,
+  attribs: Record<string, string>,
+  message?: string | null,
+  throwable: boolean = true,
+) => {
+  let promise = supabase.from(table).select('*').limit(1);
+  Object.entries(attribs).forEach(([key, value]) => {
+    promise = promise.eq(key, value);
+  });
+  const response = await promise;
+
+  if (response.error) {
+    if (throwable) throw AppError.serverError(formatError(response.error));
+    return null;
+  }
+  if (!response.data || response.data.length < 1) {
+    if (throwable)
+      throw AppError.notFound(message ?? 'Resource not found!').withEncrypted(
+        false,
+      );
+    return null;
+  }
+
+  return response.data[0] as unknown;
+};
+
+const supabaseCreateOne = async (table: string, payload: unknown) => {
+  const response = await supabase.from(table).insert([payload]).select();
+  if (response.error) throw AppError.serverError(response.error.message);
+
+  return response.data[0]! as unknown;
+};
+
+// ---------------------------------------------------------------
+
+// Get one product per product and client
+export const supabaseGetOrderProduct = async (
+  client_id: string,
+  product_id: string,
+) => {
+  const order = await supabaseGetOne('client_products', {
+    client_id,
+    product_id,
+  });
+
+  const parsed = supaOrderSchema.safeParse(order);
+
+  return zodParseResolve(parsed)!;
+};
+
+// Create on order per product and client
+export const supabaseCreateOrderProduct = async (
+  client_id: string,
+  product_id: string,
+  payment_id: string,
+  method: number,
+) => {
+  const payloadOrder = {
+    client_id,
+    product_id,
+    payment_id,
+    method,
+  };
+  const order = await supabaseCreateOne('client_products', payloadOrder);
+
+  const parsed = supaOrderSchema.safeParse(order);
+
+  return zodParseResolve(parsed);
+};
+
 export const supabaseGetProduct = async (slug: string) => {
-  const products = await supabase
-    .from('products')
-    .select('*')
-    .eq('id', slug)
-    .limit(1);
+  const productResponse = await supabaseGetOne(
+    'products',
+    { id: slug },
+    `Product ${slug} not found!`,
+  );
 
-  if (products.error || !products.data) {
-    throw AppError.serverError(formatError(products.error));
-  }
+  const parsed = supaProductsInfoSchema.safeParse(productResponse);
 
-  if (products.data.length < 1) {
-    throw AppError.notFound(`Product ${slug} not found!`).withEncrypted(false);
-  }
-
-  const parsed = z.array(supaProductsInfoSchema).safeParse(products.data);
-
-  if (!parsed.success) {
-    const errorMessages = parsed.error.issues
-      .map((issue) => issue.message)
-      .join(', ');
-    throw AppError.serverError('Parse error: ' + errorMessages);
-  }
-
-  return parsed.data[0];
+  return zodParseResolve(parsed)!;
 };
 
 export const supabaseGetProducts = async (start: number, end: number) => {
@@ -55,36 +113,24 @@ export const supabaseGetProducts = async (start: number, end: number) => {
 
   const parsed = z.array(supaProductsInfoSchema).safeParse(products.data);
 
-  if (!parsed.success) {
-    const errorMessages = parsed.error.issues
-      .map((issue) => issue.message)
-      .join(', ');
-    throw AppError.serverError('Parse error: ' + errorMessages);
-  }
-
-  return parsed.data;
+  return zodParseResolve(parsed);
 };
 
 export const supabaseGetUser = async (userid?: string) => {
-  const supaUser = await supabase
-    .from('clients')
-    .select('*')
-    .eq('user_code', userid)
-    .limit(1);
+  if (userid == null) return null;
 
-  if (supaUser.error) {
-    throw AppError.serverError(formatError(supaUser.error));
-  }
+  const user = await supabaseGetOne(
+    'clients',
+    { user_code: userid },
+    `User not found!`,
+    false,
+  );
 
-  if (supaUser.data.length < 1) return null;
+  if (user == null) return user;
 
-  const { data, error } = supaUserInfoSchema.safeParse(supaUser.data[0]);
-  if (error) {
-    const errorMessages = error.issues.map((issue) => issue.message).join(', ');
-    throw AppError.serverError('Parse error: ' + errorMessages);
-  }
+  const parsed = supaUserInfoSchema.safeParse(user);
 
-  return data;
+  return zodParseResolve(parsed);
 };
 
 export const supabaseCreateUser = async (
@@ -103,11 +149,7 @@ export const supabaseCreateUser = async (
   const supaRes = await supabase.from('clients').insert([newUser]).select();
   if (supaRes.error) throw AppError.serverError(supaRes.error.message);
 
-  const { data, error } = supaUserInfoSchema.safeParse(supaRes.data[0]);
-  if (error) {
-    const errorMessages = error.issues.map((issue) => issue.message).join(', ');
-    throw AppError.serverError('Parse error: ' + errorMessages);
-  }
+  const parsed = supaUserInfoSchema.safeParse(supaRes.data[0]);
 
-  return data;
+  return zodParseResolve(parsed);
 };

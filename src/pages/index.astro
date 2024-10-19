@@ -1,8 +1,25 @@
 ---
 import Layout from '@/layouts/Layout.astro';
+import { supabaseCreateOrderProduct } from '@/providers/supabase';
 // import { supabaseGetProducts } from '@/providers/supabase';
 
 // const products = await supabaseGetProducts(0, 10);
+
+if (Astro.locals.user) {
+  // const order = await supabaseGetOrderProduct(
+  //   '8eec45d6-4078-48b8-a918-074eea5b0d7f',
+  //   'super-asset'
+  // );
+  // console.log(order);
+  console.log(Astro.locals.user);
+  // const order = await supabaseOrderProduct(
+  //   Astro.locals.user.id,
+  //   'super-asset',
+  //   'abcdefg',
+  //   0
+  // );
+  // console.log(order);
+}
 ---
 
 <Layout title='Welcome to Astro.'>

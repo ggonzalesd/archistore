@@ -1,0 +1,101 @@
+---
+interface Props {
+  price: number;
+  size: 'SMALL' | 'LARGE';
+  discount?: number;
+}
+
+const { size, price: aPrice, discount = 0 } = Astro.props;
+
+const rawPrice = aPrice / 100;
+const rawDiscount = discount / 100;
+let price = 'FREE';
+if (rawPrice > 0) price = '$ ' + parseFloat(`${rawPrice}`).toFixed(2);
+
+const hasDiscount = price !== 'FREE' && discount > 0;
+const newPrice = '$ ' + parseFloat(`${rawPrice - rawDiscount}`).toFixed(2);
+---
+
+<div class:list={['flex h-full py-1', price === 'FREE' && 'free-span']}>
+  <svg
+    class:list={[
+      'aspect-[1_/_2] h-full w-auto text-green-400',
+      price === 'FREE' ? 'box' : 'hidden',
+    ]}
+    width='12.5'
+    height='25'
+    viewBox='0 0 3.307 6.615'
+  >
+    <path
+      d='M2.788 0c-.332 0-.643.161-.834.432L.226 2.875a.748.748 0 000 .864l1.728 2.444c.191.27.502.432.834.432h.935V0zm-.922 2.527a.78.78 0 110 1.56.78.78 0 010-1.56z'
+      fill='currentColor'
+      paint-order='stroke markers fill'></path>
+  </svg>
+  <div
+    class:list={[
+      'relative flex items-center rounded-r-md font-bold',
+      price === 'FREE' ? 'bg-green-400 pr-2 text-green-950' : 'text-yellow-500',
+      size === 'LARGE' ? 'px-2 text-2xl' : 'text-xs',
+    ]}
+  >
+    <span class:list={[hasDiscount && 'line-through opacity-50 saturate-50']}
+      >{price}</span
+    >
+    {
+      hasDiscount && (
+        <span
+          class:list={[
+            'absolute top-[80%] -rotate-12 rounded-sm border border-green-500 bg-zinc-950 px-2 py-0 text-xs text-green-500 shadow-md shadow-green-500/20 saturate-100',
+            size === 'LARGE' ? 'right-0' : 'left-0',
+          ]}
+        >
+          -{parseFloat(`${(100 * rawDiscount) / rawPrice}`).toFixed(2)}%
+        </span>
+      )
+    }
+  </div>
+</div>
+
+{
+  hasDiscount && (
+    <span
+      price-with-discount
+      class:list={[
+        'rounded-full font-bold text-green-500 shadow-md shadow-green-500/20 transition-transform duration-500 hover:-rotate-3 hover:scale-125',
+        size === 'LARGE' ? 'px-3 text-3xl' : 'px-2 text-xs',
+      ]}
+    >
+      {newPrice}
+    </span>
+  )
+}
+
+<style scoped>
+  div.free-span {
+    filter: drop-shadow(0 0 0.25rem #4f88);
+  }
+
+  span[price-with-discount] {
+    animation: price-with-discount-bg infinite linear 3s forwards;
+    background: linear-gradient(
+      120deg,
+      #0fa1 29%,
+      #0fa2 37%,
+      #0fa4 41%,
+      #4fa8 44%,
+      #0fa4 46%,
+      #0fa2 49%,
+      #0fa1 57%
+    );
+    background-size: 1000% 100%;
+  }
+
+  @keyframes price-with-discount-bg {
+    from {
+      background-position: 0%;
+    }
+    to {
+      background-position: 100%;
+    }
+  }
+</style>

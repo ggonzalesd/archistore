@@ -7,6 +7,15 @@ const dateSchema = z
   })
   .transform((value) => new Date(value));
 
+export const supaOrderSchema = z.object({
+  client_id: z.string(),
+  product_id: z.string(),
+  approved: z.boolean(),
+  method: z.number(), // 0 paypal
+  payment_id: z.string(),
+  created_at: dateSchema,
+});
+
 export const supaUserInfoSchema = z.object({
   id: z.string(),
   created_at: dateSchema,
@@ -31,4 +40,5 @@ export const supaProductsInfoSchema = z.object({
   status: z.number().int().min(0),
   created_at: dateSchema,
   discount_end: dateSchema.optional().nullable(),
+  tags: z.string().optional().nullable(),
 });

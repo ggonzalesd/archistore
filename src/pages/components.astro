@@ -13,7 +13,7 @@ const products = await supabaseGetProducts(0, 10);
     >
       {
         products.map(({ price, title, id }) => (
-          <AssetCard slug={id} title={title} price={price / 100} />
+          <AssetCard slug={id} title={title} price={price} discount={100} />
         ))
       }
     </div>
