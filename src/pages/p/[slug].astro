@@ -10,6 +10,7 @@ import PhotoView from '@/components/PhotoView';
 import { generateFreeJwtToken } from '@/providers/jwt';
 import { supabaseGetProduct } from '@/providers/supabase';
 import { AppError, responseError } from '@/utils/app-error';
+import { supabaseAuthHelper } from '@/utils/supabase-auth-helper';
 
 const { slug } = Astro.params;
 
@@ -19,7 +20,8 @@ const tokenFree = generateFreeJwtToken(slug ?? '');
 try {
   if (!slug) throw AppError.notFound('Product not found').withEncrypted(false);
 
-  product = await supabaseGetProduct(slug);
+  const supabase = supabaseAuthHelper(Astro);
+  product = await supabaseGetProduct(supabase, slug);
 } catch (e) {
   return responseError(e, Astro);
 }

@@ -1,10 +1,17 @@
 import type { APIRoute } from 'astro';
 
-import { supabase } from '@/providers/supabase';
 import { checkFreeJwtToken } from '@/providers/jwt';
 import { AppError, responseError } from '@/utils/app-error';
+import { supabaseAuthHelper } from '@/utils/supabase-auth-helper';
 
-export const GET: APIRoute = async ({ params, url, rewrite, locals }) => {
+export const GET: APIRoute = async ({
+  params,
+  url,
+  rewrite,
+  locals,
+  cookies,
+  request,
+}) => {
   let isOk = false;
 
   const freeQuery = url.searchParams.get('free');
@@ -25,8 +32,7 @@ export const GET: APIRoute = async ({ params, url, rewrite, locals }) => {
     }
   }
 
-  console.log(params.slug);
-
+  const supabase = supabaseAuthHelper({ request, cookies });
   const result = await supabase.storage
     .from('app')
     .createSignedUrl('download/profile.jpg', 60);

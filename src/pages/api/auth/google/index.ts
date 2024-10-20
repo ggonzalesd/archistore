@@ -1,18 +1,26 @@
+import { supabaseAuthHelper } from '@/utils/supabase-auth-helper';
 import type { APIRoute } from 'astro';
 
-import { createLoginUrl, generateGoogleClient } from '@/providers/google';
-
-export const GET: APIRoute = ({ url }) => {
+export const GET: APIRoute = async ({ url, redirect, cookies, request }) => {
   const state = url.searchParams.get('state');
 
-  const google = generateGoogleClient();
+  const supabase = supabaseAuthHelper({ cookies, request });
+  const queryParams: Record<string, string> = {
+    prompt: 'select_account',
+  };
+  if (state) {
+    queryParams['state'] = state;
+  }
 
-  const authUrl = createLoginUrl(google, state);
-
-  return new Response(null, {
-    status: 302,
-    headers: {
-      Location: authUrl,
+  const google = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: url.origin + '/api/auth/google/callback',
+      scopes: 'email profile',
+      queryParams,
     },
   });
+  if (google.error) throw google.error;
+
+  return redirect(google.data.url, 302);
 };

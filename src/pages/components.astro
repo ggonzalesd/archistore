@@ -2,8 +2,10 @@
 import Layout from '@/layouts/Layout.astro';
 import AssetCard from '@/components/AssetCard.astro';
 import { supabaseGetProducts } from '@/providers/supabase';
+import { supabaseAuthHelper } from '@/utils/supabase-auth-helper';
 
-const products = await supabaseGetProducts(0, 10);
+const supabase = supabaseAuthHelper(Astro);
+const products = await supabaseGetProducts(supabase, 0, 10);
 ---
 
 <Layout title='Components'>

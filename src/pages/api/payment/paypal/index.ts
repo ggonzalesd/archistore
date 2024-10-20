@@ -4,14 +4,23 @@ import {
   supabaseCreateOrderProduct,
 } from '@/providers/supabase';
 import { AppError, responseError } from '@/utils/app-error';
+import { supabaseAuthHelper } from '@/utils/supabase-auth-helper';
 import type { APIRoute } from 'astro';
 
 // Crear una compra
-export const GET: APIRoute = async ({ url, rewrite, locals, redirect }) => {
+export const GET: APIRoute = async ({
+  url,
+  rewrite,
+  locals,
+  redirect,
+  request,
+  cookies,
+}) => {
+  const supabase = supabaseAuthHelper({ cookies, request });
   try {
     const idProduct = url.searchParams.get('id');
 
-    const product = await supabaseGetProduct(idProduct!);
+    const product = await supabaseGetProduct(supabase, idProduct!);
 
     const authData = await paypalAuth();
     const access_token = authData.access_token;
@@ -33,6 +42,7 @@ export const GET: APIRoute = async ({ url, rewrite, locals, redirect }) => {
     }
 
     const orderProduct = await supabaseCreateOrderProduct(
+      supabase,
       locals.user?.id!,
       product.id,
       order.id,

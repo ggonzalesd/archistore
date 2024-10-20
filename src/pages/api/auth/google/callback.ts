@@ -1,40 +1,45 @@
 import type { APIRoute } from 'astro';
 
-import { getFromCode } from '@/providers/google';
 import { generateJwtToken } from '@/providers/jwt';
-import { supabaseCreateUser, supabaseGetUser } from '@/providers/supabase';
 
-import { responseError } from '@/utils/app-error';
+import { AppError, responseError } from '@/utils/app-error';
+import { supabaseAuthHelper } from '@/utils/supabase-auth-helper';
 
-export const GET: APIRoute = async (context) => {
+export const GET: APIRoute = async ({
+  url,
+  request,
+  cookies,
+  redirect,
+  locals,
+  rewrite,
+}) => {
   // Verific if where is a param 'code'
-  const state = context.url.searchParams.get('state');
-  const code = context.url.searchParams.get('code');
+  const state = url.searchParams.get('state');
+  const code = url.searchParams.get('code');
+
+  const supabase = supabaseAuthHelper({ request, cookies }, false);
 
   try {
-    const payload = await getFromCode(code);
+    const session = await supabase.auth.exchangeCodeForSession(code!);
 
-    // Check if there is an user in our database
-    let supaUser = await supabaseGetUser('google/' + payload.sub);
-
-    if (!supaUser) {
-      supaUser = await supabaseCreateUser(
-        'google/' + payload.sub,
-        payload.name,
-        payload.picture,
-        payload.email,
-      );
+    if (session.error) {
+      const e = session.error;
+      throw new AppError(e.message, e.status, true);
     }
 
+    await supabase.auth.signOut({ scope: 'global' });
+
+    const payload = session.data;
+
     const payloadJwt = {
-      sub: supaUser.id,
-      roles: supaUser.roles,
-      name: supaUser.display,
-      photo: supaUser.photo,
+      sub: payload.user.id,
+      roles: 0,
+      name: payload.user.user_metadata.full_name,
+      photo: payload.user.user_metadata.picture,
     };
     const jwt = generateJwtToken(payloadJwt);
 
-    context.cookies.set('x-auth', jwt, {
+    cookies.set('x-auth', jwt, {
       secure: import.meta.env.PROD,
       httpOnly: true,
       maxAge: 60 * 60 * 24 * 30,
@@ -42,8 +47,8 @@ export const GET: APIRoute = async (context) => {
       sameSite: 'lax',
     });
 
-    return context.redirect(state ?? '/', 302);
+    return redirect(state ?? '/', 302);
   } catch (e) {
-    return responseError(e, context);
+    return responseError(e, { locals, rewrite });
   }
 };

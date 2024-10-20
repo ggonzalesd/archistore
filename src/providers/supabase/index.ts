@@ -1,4 +1,3 @@
-import { createClient, type PostgrestError } from '@supabase/supabase-js';
 import { z } from 'astro:schema';
 
 import {
@@ -9,16 +8,16 @@ import {
 
 import { AppError } from '@/utils/app-error';
 import { zodParseResolve } from '@/utils/zod-parse-resolver';
-
-const supabaseUrl = import.meta.env.SECRET_SUPABASE_URL;
-const supabaseKey = import.meta.env.SECRET_SUPABASE_SECRET;
-export const supabase = createClient(supabaseUrl, supabaseKey);
+import type { PostgrestError, SupabaseClient } from '@supabase/supabase-js';
 
 const formatError = (e: PostgrestError) => {
   return `Supabase Error\nCode: ${e.code}\nMessage: ${e.message}\nHint: ${e.hint}\nDetails: ${e.details}`;
 };
 
+type SupabaseServerClient = SupabaseClient<any, 'public', any>;
+
 const supabaseGetOne = async (
+  supabase: SupabaseServerClient,
   table: string,
   attribs: Record<string, string>,
   message?: string | null,
@@ -45,7 +44,11 @@ const supabaseGetOne = async (
   return response.data[0] as unknown;
 };
 
-const supabaseCreateOne = async (table: string, payload: unknown) => {
+const supabaseCreateOne = async (
+  supabase: SupabaseServerClient,
+  table: string,
+  payload: unknown,
+) => {
   const response = await supabase.from(table).insert([payload]).select();
   if (response.error) throw AppError.serverError(response.error.message);
 
@@ -56,10 +59,11 @@ const supabaseCreateOne = async (table: string, payload: unknown) => {
 
 // Get one product per product and client
 export const supabaseGetOrderProduct = async (
+  supabase: SupabaseServerClient,
   client_id: string,
   product_id: string,
 ) => {
-  const order = await supabaseGetOne('client_products', {
+  const order = await supabaseGetOne(supabase, 'client_products', {
     client_id,
     product_id,
   });
@@ -71,6 +75,7 @@ export const supabaseGetOrderProduct = async (
 
 // Create on order per product and client
 export const supabaseCreateOrderProduct = async (
+  supabase: SupabaseServerClient,
   client_id: string,
   product_id: string,
   payment_id: string,
@@ -82,15 +87,23 @@ export const supabaseCreateOrderProduct = async (
     payment_id,
     method,
   };
-  const order = await supabaseCreateOne('client_products', payloadOrder);
+  const order = await supabaseCreateOne(
+    supabase,
+    'client_products',
+    payloadOrder,
+  );
 
   const parsed = supaOrderSchema.safeParse(order);
 
   return zodParseResolve(parsed);
 };
 
-export const supabaseGetProduct = async (slug: string) => {
+export const supabaseGetProduct = async (
+  supabase: SupabaseServerClient,
+  slug: string,
+) => {
   const productResponse = await supabaseGetOne(
+    supabase,
     'products',
     { id: slug },
     `Product ${slug} not found!`,
@@ -101,7 +114,11 @@ export const supabaseGetProduct = async (slug: string) => {
   return zodParseResolve(parsed)!;
 };
 
-export const supabaseGetProducts = async (start: number, end: number) => {
+export const supabaseGetProducts = async (
+  supabase: SupabaseServerClient,
+  start: number,
+  end: number,
+) => {
   const products = await supabase
     .from('products')
     .select('*')
@@ -112,44 +129,6 @@ export const supabaseGetProducts = async (start: number, end: number) => {
   }
 
   const parsed = z.array(supaProductsInfoSchema).safeParse(products.data);
-
-  return zodParseResolve(parsed);
-};
-
-export const supabaseGetUser = async (userid?: string) => {
-  if (userid == null) return null;
-
-  const user = await supabaseGetOne(
-    'clients',
-    { user_code: userid },
-    `User not found!`,
-    false,
-  );
-
-  if (user == null) return user;
-
-  const parsed = supaUserInfoSchema.safeParse(user);
-
-  return zodParseResolve(parsed);
-};
-
-export const supabaseCreateUser = async (
-  user_code: string,
-  display?: string | null,
-  photo?: string | null,
-  email?: string | null,
-) => {
-  const newUser = {
-    user_code,
-    display,
-    photo,
-    email,
-  };
-
-  const supaRes = await supabase.from('clients').insert([newUser]).select();
-  if (supaRes.error) throw AppError.serverError(supaRes.error.message);
-
-  const parsed = supaUserInfoSchema.safeParse(supaRes.data[0]);
 
   return zodParseResolve(parsed);
 };
