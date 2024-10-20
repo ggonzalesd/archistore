@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 
 import { checkFreeJwtToken } from '@/providers/jwt';
+
 import { AppError, responseError } from '@/utils/app-error';
 import { supabaseAuthHelper } from '@/utils/supabase-auth-helper';
 

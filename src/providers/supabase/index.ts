@@ -1,14 +1,13 @@
+import type { PostgrestError, SupabaseClient } from '@supabase/supabase-js';
 import { z } from 'astro:schema';
 
 import {
   supaOrderSchema,
   supaProductsInfoSchema,
-  supaUserInfoSchema,
 } from '@/schema/supabase.schema';
 
 import { AppError } from '@/utils/app-error';
 import { zodParseResolve } from '@/utils/zod-parse-resolver';
-import type { PostgrestError, SupabaseClient } from '@supabase/supabase-js';
 
 const formatError = (e: PostgrestError) => {
   return `Supabase Error\nCode: ${e.code}\nMessage: ${e.message}\nHint: ${e.hint}\nDetails: ${e.details}`;
@@ -63,14 +62,38 @@ export const supabaseGetOrderProduct = async (
   client_id: string,
   product_id: string,
 ) => {
-  const order = await supabaseGetOne(supabase, 'client_products', {
-    client_id,
-    product_id,
-  });
+  const order = await supabaseGetOne(
+    supabase,
+    'client_products',
+    {
+      client_id,
+      product_id,
+    },
+    'Order not found!',
+  );
 
   const parsed = supaOrderSchema.safeParse(order);
 
   return zodParseResolve(parsed)!;
+};
+
+export const supabaseUpdateOrderProduct = async (
+  supabase: SupabaseServerClient,
+  client_id: string,
+  product_id: string,
+  approved: boolean,
+) => {
+  const { error } = await supabase
+    .from('client_products')
+    .update({ approved })
+    .eq('client_id', client_id)
+    .eq('product_id', product_id);
+
+  if (error) {
+    throw formatError(error);
+  }
+
+  return true;
 };
 
 // Create on order per product and client

@@ -1,7 +1,10 @@
 ---
 import Layout from '@/layouts/Layout.astro';
-import AssetCard from '@/components/AssetCard.astro';
+
 import { supabaseGetProducts } from '@/providers/supabase';
+
+import AssetCard from '@/components/AssetCard.astro';
+
 import { supabaseAuthHelper } from '@/utils/supabase-auth-helper';
 
 const supabase = supabaseAuthHelper(Astro);

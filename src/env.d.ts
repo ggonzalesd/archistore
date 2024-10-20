@@ -12,6 +12,7 @@ interface IPurchaseUnit {
 interface IPaypalCreate {
   intent: 'CAPTURE';
   purchase_units: Array<IPurchaseUnit>;
+  shipping_preference: 'NO_SHIPPING';
   application_context: {
     brand_name: string;
     landing_page: 'NO_PREFERENCE';

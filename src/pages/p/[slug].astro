@@ -1,11 +1,13 @@
 ---
 import Layout from '@/layouts/Layout.astro';
-import PaypalSvg from '@/components/logos/PaypalSvg.astro';
-import MercadoPagoSvg from '@/components/logos/MercadoPagoSvg.astro';
-import WaitingButton from '@/components/WaitingButton';
+
 import PaymentButton from '@/components/PaymentButton.astro';
 import Price from '@/components/Price.astro';
+
+import WaitingButton from '@/components/WaitingButton';
 import PhotoView from '@/components/PhotoView';
+
+import PaypalSvg from '@/components/logos/PaypalSvg.astro';
 
 import { generateFreeJwtToken } from '@/providers/jwt';
 import { supabaseGetProduct } from '@/providers/supabase';

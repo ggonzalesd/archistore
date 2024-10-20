@@ -1,7 +1,9 @@
 import {
   paypalAuthSchema,
+  paypalCheckoutInfoSchema,
   paypalCreateResponseSchema,
 } from '@/schema/paypal.schema';
+
 import { HttpRequestResolve } from '@/utils/http-request-fail-resolve';
 import { zodParseResolve } from '@/utils/zod-parse-resolver';
 
@@ -50,6 +52,7 @@ export const paypalCreateOrder = async (
         },
       },
     ],
+    shipping_preference: 'NO_SHIPPING',
     application_context: {
       brand_name: 'Archistore',
       landing_page: 'NO_PREFERENCE',
@@ -74,6 +77,28 @@ export const paypalCreateOrder = async (
 
   const json = await response.json();
   const parsed = paypalCreateResponseSchema.safeParse(json);
+
+  return zodParseResolve(parsed);
+};
+
+export const paypalGetOrderInfo = async (payment_id: string) => {
+  const response = await fetch(
+    import.meta.env.SECRET_PAYPAL_API + '/v2/checkout/orders/' + payment_id,
+    {
+      method: 'GET',
+      headers: {
+        Authorization:
+          'Basic ' +
+          btoa(
+            `${import.meta.env.SECRET_PAYPAL_ID}:${import.meta.env.SECRET_PAYPAL_SECRET}`,
+          ),
+      },
+    },
+  );
+  await HttpRequestResolve(response);
+
+  const json = await response.json();
+  const parsed = paypalCheckoutInfoSchema.safeParse(json);
 
   return zodParseResolve(parsed);
 };
