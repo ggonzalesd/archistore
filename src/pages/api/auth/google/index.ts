@@ -15,7 +15,7 @@ export const GET: APIRoute = async ({ url, redirect, cookies, request }) => {
   const google = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: url.origin + '/api/auth/google/callback',
+      redirectTo: import.meta.env.PUBLIC_HOST + '/api/auth/google/callback',
       scopes: 'email profile',
       queryParams,
     },
