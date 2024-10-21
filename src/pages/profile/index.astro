@@ -1,5 +1,53 @@
 ---
-import Layout from "@/layouts/Layout.astro";
+import Layout from '@/layouts/Layout.astro';
+import { AppError } from '@/utils/app-error';
+import { supabaseAuthHelper } from '@/utils/supabase-auth-helper';
+import { supaProductsPurchasedSchema } from '@/schema/supabase.schema';
+import { cloudinaryImageUrl } from '@/utils/cloudinary-image-url';
+import PriceSection from '@/components/PriceSection.astro';
+
+const supabase = supabaseAuthHelper(Astro);
+
+const client_id = Astro.locals.user?.id!;
+
+const response = await supabase
+  .from('client_products')
+  .select('approved, payment_id, method, products (id, title)')
+  .eq('client_id', client_id);
+
+if (response.error) {
+  throw AppError.serverError('Something wrong');
+}
+const parsed = supaProductsPurchasedSchema.safeParse(response.data);
+
+if (parsed.error) {
+  throw parsed.error;
+}
+
+const data = parsed.data;
 ---
 
-<Layout title="profile"></Layout>
+<Layout title='profile'>
+  <section class='container mx-auto px-2 pt-24'>
+    <h2>My Assets</h2>
+    <div class='grid grid-cols-1 gap-2 lg:grid-cols-2'>
+      {
+        data.map(({ products: { id, title }, approved }) => (
+          <div class='size-full p-4'>
+            <article class='flex items-center justify-between gap-4 rounded-md bg-gradient-to-r from-rose-600/10 to-sky-600/10 p-2'>
+              <img
+                class='rounded-md bg-rose-900/20 p-1 shadow-black drop-shadow-xl'
+                src={cloudinaryImageUrl(id)}
+                width='64'
+                height='64'
+                alt={title}
+              />
+              <a href={'/p/' + id}>{title}</a>
+              <PriceSection slug={id} approved={approved} />
+            </article>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+</Layout>

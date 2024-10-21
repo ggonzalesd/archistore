@@ -60,7 +60,7 @@ export default function WaitingButton({
     <a
       aria-disabled='true'
       href={state === 'OK' ? href : reload}
-      target={state === 'OK' ? '_blank' : undefined}
+      download={state === 'OK' ? true : undefined}
       class={[
         'waiting-button group relative inline-flex items-center gap-2 rounded-sm bg-rose-500 px-2 py-1 text-rose-950 transition-all hover:scale-105 hover:cursor-pointer hover:bg-rose-400 hover:shadow-md hover:shadow-rose-600/50',
         state === 'WAITING' && 'pointer-events-none animate-pulse saturate-0',

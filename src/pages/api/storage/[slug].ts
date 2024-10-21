@@ -4,6 +4,10 @@ import { checkFreeJwtToken } from '@/providers/jwt';
 
 import { AppError, responseError } from '@/utils/app-error';
 import { supabaseAuthHelper } from '@/utils/supabase-auth-helper';
+import {
+  supabaseGetOrderProduct,
+  supabaseGetProduct,
+} from '@/providers/supabase';
 
 export const GET: APIRoute = async ({
   params,
@@ -14,6 +18,7 @@ export const GET: APIRoute = async ({
   request,
 }) => {
   let isOk = false;
+  const slug = params.slug!;
 
   const freeQuery = url.searchParams.get('free');
   if (typeof freeQuery === 'string') {
@@ -34,9 +39,29 @@ export const GET: APIRoute = async ({
   }
 
   const supabase = supabaseAuthHelper({ request, cookies });
+
+  if (!isOk) {
+    const client_id = locals.user?.id!;
+
+    if (client_id == null)
+      throw AppError.unauthorized('User is not authenticated').withEncrypted(
+        false,
+      );
+
+    const order = await supabaseGetOrderProduct(supabase, client_id, slug);
+
+    if (!order.approved) {
+      throw AppError.unauthorized(
+        "Your can't download this resource for now",
+      ).withEncrypted(false);
+    }
+  }
+
+  const product = await supabaseGetProduct(supabase, slug);
+
   const result = await supabase.storage
     .from('app')
-    .createSignedUrl('download/profile.jpg', 60);
+    .createSignedUrl('download/' + product.filename, 60);
 
   if (result.error) {
     return new Response(JSON.stringify({ message: result.error.message }));

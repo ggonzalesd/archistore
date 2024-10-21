@@ -10,20 +10,38 @@ import PhotoView from '@/components/PhotoView';
 import PaypalSvg from '@/components/logos/PaypalSvg.astro';
 
 import { generateFreeJwtToken } from '@/providers/jwt';
-import { supabaseGetProduct } from '@/providers/supabase';
+import {
+  supabaseGetOrderProduct,
+  supabaseGetProduct,
+} from '@/providers/supabase';
 import { AppError, responseError } from '@/utils/app-error';
 import { supabaseAuthHelper } from '@/utils/supabase-auth-helper';
+import PriceSection from '@/components/PriceSection.astro';
 
 const { slug } = Astro.params;
 
 let product: Awaited<ReturnType<typeof supabaseGetProduct>> | null = null;
 const tokenFree = generateFreeJwtToken(slug ?? '');
 
+let order: Awaited<ReturnType<typeof supabaseGetOrderProduct>> | null = null;
+
 try {
   if (!slug) throw AppError.notFound('Product not found').withEncrypted(false);
 
   const supabase = supabaseAuthHelper(Astro);
   product = await supabaseGetProduct(supabase, slug);
+
+  if (Astro.locals.user && product.price > 0) {
+    try {
+      order = await supabaseGetOrderProduct(
+        supabase,
+        Astro.locals.user.id,
+        product.id
+      );
+    } catch (e) {
+      // Nothing to do
+    }
+  }
 } catch (e) {
   return responseError(e, Astro);
 }
@@ -58,29 +76,15 @@ try {
       <div class='my-4 flex gap-4'>
         {
           !(product.price > 0) && (
-            <WaitingButton
-              href={`/api/storage/${slug}/?free=${tokenFree}`}
-              reload={'/p/' + slug}
-              time={15}
-              maxtime={60 * 5}
-              client:visible
-            />
+            <span>
+              The download button is located at the bottom of the page.
+            </span>
           )
         }
 
         {
           product.price > 0 && (
-            <PaymentButton
-              href={'/api/payment/paypal?id=' + slug}
-              variant='paypal'
-            >
-              <PaypalSvg class='size-4' />
-              <span>Paypal</span>
-            </PaymentButton>
-            // <PaymentButton href='/api/payment/mercadopago' variant='mercadopago'>
-            //   <MercadoPagoSvg class='size-4' />
-            //   <span>Mercado Pago</span>
-            // </PaymentButton>
+            <PriceSection slug={slug} approved={order?.approved} />
           )
         }
       </div>
@@ -108,7 +112,7 @@ try {
           reload={'/p/' + slug}
           time={15}
           maxtime={60 * 5}
-          client:visible
+          client:load
         />
       )
     }

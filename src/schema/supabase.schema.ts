@@ -41,4 +41,14 @@ export const supaProductsInfoSchema = z.object({
   created_at: dateSchema,
   discount_end: dateSchema.optional().nullable(),
   tags: z.string().optional().nullable(),
+  filename: z.string(),
 });
+
+export const supaProductsPurchasedSchema = z.array(
+  z.object({
+    approved: z.boolean(),
+    payment_id: z.string(),
+    method: z.number(),
+    products: z.object({ id: z.string(), title: z.string() }),
+  }),
+);

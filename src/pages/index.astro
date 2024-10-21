@@ -1,39 +1,26 @@
 ---
 import Layout from '@/layouts/Layout.astro';
-import { supabaseCreateOrderProduct } from '@/providers/supabase';
-// import { supabaseGetProducts } from '@/providers/supabase';
 
-// const products = await supabaseGetProducts(0, 10);
+import { supabaseGetProducts } from '@/providers/supabase';
 
-if (Astro.locals.user) {
-  // const order = await supabaseGetOrderProduct(
-  //   '8eec45d6-4078-48b8-a918-074eea5b0d7f',
-  //   'super-asset'
-  // );
-  // console.log(order);
-  console.log(Astro.locals.user);
-  // const order = await supabaseOrderProduct(
-  //   Astro.locals.user.id,
-  //   'super-asset',
-  //   'abcdefg',
-  //   0
-  // );
-  // console.log(order);
-}
+import AssetCard from '@/components/AssetCard.astro';
+
+import { supabaseAuthHelper } from '@/utils/supabase-auth-helper';
+
+const supabase = supabaseAuthHelper(Astro);
+const products = await supabaseGetProducts(supabase, 0, 10);
 ---
 
-<Layout title='Welcome to Astro.'>
-  <section class='mx-auto w-full max-w-screen-lg'>
-    {
-      //  products.map((data) => (
-      //    <article>
-      //      <div>{JSON.stringify(data)}</div>
-      //      <h5>{data.title}</h5>
-      //      <p>{data.description}</p>
-      //      <p>{data.price / 100}</p>
-      //      <span>{new Date(data.created_at ?? '').toLocaleString()}</span>
-      //    </article>
-      //  ))
-    }
+<Layout title='Components'>
+  <section class='container mx-auto h-screen pt-20'>
+    <div
+      class='grid grid-cols-2 gap-2 px-2 py-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-10'
+    >
+      {
+        products.map(({ price, title, id }) => (
+          <AssetCard slug={id} title={title} price={price} discount={100} />
+        ))
+      }
+    </div>
   </section>
 </Layout>

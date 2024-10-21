@@ -1,0 +1,50 @@
+---
+import LinkButton from './LinkButton.astro';
+import PaypalSvg from './logos/PaypalSvg.astro';
+import PaymentButton from './PaymentButton.astro';
+
+interface Props {
+  slug: string;
+  approved?: boolean | null;
+}
+
+const { slug, approved } = Astro.props;
+
+let state: 'BUY' | 'COMPLETED' | 'PROCCESS' = 'BUY';
+
+if (approved == true) state = 'COMPLETED';
+if (approved == false) state = 'PROCCESS';
+---
+
+{
+  state === 'BUY' && (
+    <PaymentButton href={'/api/payment/paypal?id=' + slug} variant='paypal'>
+      <PaypalSvg class='size-4' />
+      <span>Paypal</span>
+    </PaymentButton>
+    // <PaymentButton href='/api/payment/mercadopago' variant='mercadopago'>
+    //   <MercadoPagoSvg class='size-4' />
+    //   <span>Mercado Pago</span>
+    // </PaymentButton>
+  )
+}
+
+{
+  state === 'COMPLETED' && (
+    <LinkButton href={'/api/storage/' + slug}>Download</LinkButton>
+  )
+}
+
+{
+  state === 'PROCCESS' && (
+    <div class='flex flex-col gap-2'>
+      <span>The payment is being proccesing</span>
+      <a
+        class='inline-flex rounded-sm px-2 py-1 text-xs text-rose-400 underline transition-colors hover:bg-rose-600/5 hover:text-rose-500'
+        href={'/api/payment/validate?id=' + slug}
+      >
+        You already pay for this?
+      </a>
+    </div>
+  )
+}

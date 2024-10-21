@@ -6,7 +6,7 @@ const user = Astro.locals.user;
 ---
 
 <header
-  class='fixed left-0 top-0 h-12 w-full bg-gradient-to-t from-rose-950/50 to-rose-400/0 backdrop-blur-[2px]'
+  class='fixed left-0 top-0 z-20 h-12 w-full bg-rose-950 backdrop-blur-[2px]'
 >
   <section
     class='container z-10 mx-auto flex h-full items-center justify-between px-2'
@@ -19,5 +19,10 @@ const user = Astro.locals.user;
     </a>
     {!user && <LinkButton href='/login'>Login</LinkButton>}
     {!!user && <Avatar />}
+  </section>
+  <section class='flex bg-yellow-600'>
+    <div class='container mx-auto flex px-2'>
+      This page is under development
+    </div>
   </section>
 </header>

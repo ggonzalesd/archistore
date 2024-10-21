@@ -18,7 +18,9 @@ const readJwtToken = defineMiddleware((context, next) => {
 });
 
 const validateAccountPayment = defineMiddleware((context, next) => {
-  if (context.url.pathname.startsWith('/api/payment')) {
+  const pathname = context.url.pathname;
+
+  if (pathname.startsWith('/api/payment') || pathname.startsWith('/profile')) {
     const user = context.locals.user;
     if (!user || !user.id) {
       const params = new URLSearchParams();
