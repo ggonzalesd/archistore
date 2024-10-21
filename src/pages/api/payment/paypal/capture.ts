@@ -53,7 +53,10 @@ export const GET: APIRoute = async (context) => {
         true,
       );
 
-      return context.redirect('/', 302);
+      return context.redirect(
+        '/p/' + info.purchase_units[0].reference_id!,
+        302,
+      );
     }
 
     const payUrl = info.links.find(({ rel }) => rel === 'approve');
